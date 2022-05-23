@@ -127,7 +127,7 @@ pub struct SigmaG2<T> {
 }
 
 /// The proof produced by the ZKSNARK algorithm.
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct Proof<U, V> {
     a: U,
     b: V,

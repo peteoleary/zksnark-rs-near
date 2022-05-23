@@ -67,16 +67,16 @@ fn do_binary_output(output_path: std::path::PathBuf,  buf: Vec<u8>) -> File {
     return file
 }
 
-fn read_bin_file<V: Decodable>(setup_path: std::path::PathBuf) -> V {
+fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
     let setup_bin = &*::std::fs::read(setup_path).unwrap();
-    return decode::<V>(setup_bin).unwrap();
+    return V::try_from_slice(setup_bin).unwrap();
 }
 
 // arbitrary check value addeed to the *File structs so that we can ensure they are deserialized correctly
 // in unit tests
 const CHECK: u32 = 0xABAD1DEA;
 
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 struct SetupFile {
     check: u32,
     code: String,
@@ -95,11 +95,11 @@ fn setup(zk_path: std::path::PathBuf, output_path: std::path::PathBuf) {
     let setup_file_object = SetupFile {check: CHECK, qap: qap, code: String::from(code), sigmag1: sigmag1, sigmag2: sigmag2};
 
     // do_string_output(output_path, json::encode(&setup_file_object).unwrap());
-    let encoded =  encode(&setup_file_object, Infinite).unwrap();
+    let encoded =  setup_file_object.try_to_vec().unwrap();
     do_binary_output(output_path, encoded);
 }
 
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 struct ProofFile {
     check: u32,
     proof: Proof<G1Local, G2Local>
@@ -114,7 +114,7 @@ fn proof(assignments: &[FrLocal], setup_path: std::path::PathBuf, output_path: s
 
     let proof = zksnark::groth16::prove(&setup.qap, (&setup.sigmag1, &setup.sigmag2), &weights);
     let proof_file = ProofFile {check: CHECK, proof: proof};
-    let encoded =  encode(&proof_file, Infinite).unwrap();
+    let encoded =  proof_file.try_to_vec().unwrap();
     do_binary_output(output_path, encoded);
 }
 
@@ -130,16 +130,6 @@ fn verify(assignments: &[FrLocal], setup_path: std::path::PathBuf, proof_path: s
 
 fn parse_assignment_string(s: &str) -> Vec<FrLocal> {
     return s.split(',').map(|item| FrLocal::from_str(item).unwrap()).into_iter().collect::<Vec<FrLocal>>();
-}
-
-fn read_setup_file<'a>(setup_path: std::path::PathBuf) -> Result<SetupFile, self::rustc_serialize::json::DecoderError> {
-    let setup_json = &*::std::fs::read_to_string(setup_path).unwrap();
-    let setup: Result< SetupFile, self::rustc_serialize::json::DecoderError> = json::decode(setup_json);
-
-    return setup;
-}
-
-fn proof(setup_path: std::path::PathBuf, output_path: Option<std::path::PathBuf>) {
 }
 
 // command line example from https://github.com/clap-rs/clap/blob/v3.1.18/examples/git-derive.rs

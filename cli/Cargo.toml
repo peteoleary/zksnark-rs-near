@@ -8,5 +8,4 @@ edition = "2021"
 [dependencies]
 clap = { version = "3.0", features = ["derive"] }
 zksnark = { version = "^0", path = ".." }
-rustc-serialize = "0.3.24"
-bincode = {version = "~0.6.0", features = ["rustc-serialize"]}
+borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }

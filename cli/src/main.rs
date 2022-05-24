@@ -1,8 +1,10 @@
 
+use std::str::FromStr;
+
 use clap::{Parser, Subcommand};
 
 use zksnark::groth16::fr::FrLocal;
-use zksnark::serialization::{SetupFile, ProofFile}
+use zksnark::serialization::{SetupFile, ProofFile};
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Debug, Parser)]
@@ -49,12 +51,12 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Setup { zk_path, output_path }  => SetupFile::from_file(zk_path.unwrap(), output_path.unwrap()),
+        Commands::Setup { zk_path, output_path }  => SetupFile::from_zk_file(zk_path.unwrap()).to_file(output_path.unwrap()),
         Commands::Proof { assignments, setup_path, output_path }  => {
-            proof(&parse_assignment_string(&assignments.unwrap()[..]), setup_path.unwrap(), output_path.unwrap());
+            ProofFile::from_setup_file(&parse_assignment_string(&assignments.unwrap()[..]), setup_path.unwrap()).to_file(output_path.unwrap());
         },
         Commands::Verify { assignments, setup_path, proof_path }  => {
-            verify(&parse_assignment_string(&assignments.unwrap()[..]), setup_path.unwrap(), proof_path.unwrap());
+            SetupFile::from_file(setup_path.unwrap()).verify_from_file(&parse_assignment_string(&assignments.unwrap()[..]), proof_path.unwrap());
         },
         _ => println!("unknown command!"),
     }

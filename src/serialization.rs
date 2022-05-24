@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use std::io::{stdout, Write};
 use std::fs::{File};
 
@@ -42,7 +40,7 @@ fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
 const CHECK: u32 = 0xABAD1DEA;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
-struct SetupFile {
+pub struct SetupFile {
     check: u32,
     code: String,
     qap: QAP<CoefficientPoly<FrLocal>>,
@@ -52,58 +50,74 @@ struct SetupFile {
 
 impl SetupFile {
 
-    fn setup() {
-        
-    }
-
-    fn from_file(zk_path: std::path::PathBuf, output_path: std::path::PathBuf) {
-
-        let code = &*::std::fs::read_to_string(zk_path).unwrap();
+    pub fn from_zk(code: &str) -> SetupFile {
         let qap: QAP<CoefficientPoly<FrLocal>> = ASTParser::try_parse(code).unwrap().into();
     
         let (sigmag1, sigmag2) = groth16::setup(&qap);
     
-        let setup_file_object = SetupFile {check: CHECK, qap: qap, code: String::from(code), sigmag1: sigmag1, sigmag2: sigmag2};
-    
-        // do_string_output(output_path, json::encode(&setup_file_object).unwrap());
-        let encoded =  setup_file_object.try_to_vec().unwrap();
+        return SetupFile {check: CHECK, qap: qap, code: String::from(code), sigmag1: sigmag1, sigmag2: sigmag2};
+    }
+
+    pub fn from_zk_file(zk_path: std::path::PathBuf) -> SetupFile {
+
+        let code = &*::std::fs::read_to_string(zk_path).unwrap();
+        return SetupFile::from_zk(code);
+    }
+
+    pub fn to_file(&self, output_path: std::path::PathBuf) {
+        let encoded =  self.try_to_vec().unwrap();
         do_binary_output(output_path, encoded);
     }
 
-    fn to_file() {
+    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
+        let sigmas = (self.sigmag1.clone(), self.sigmag2.clone());
+        return groth16::verify::<CoefficientPoly<FrLocal>, _, _, _, _> (
+            sigmas,
+            assignments,
+            proof.proof
+        );
+    }
 
+    pub fn verify_from_file(&self, assignments: &[FrLocal], proof_path: std::path::PathBuf) -> bool {
+        let proof: ProofFile = read_bin_file(proof_path);
+        return self.verify(assignments, proof)
+    }
+
+    pub fn from_file(setup_path: std::path::PathBuf) -> SetupFile {
+        return read_bin_file(setup_path)
     }
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
-struct ProofFile {
+pub struct ProofFile {
     check: u32,
     proof: Proof<G1Local, G2Local>
 }
 
 impl ProofFile {
-    fn proof(assignments: &[FrLocal], setup_path: std::path::PathBuf, output_path: std::path::PathBuf) 
+    
+    pub fn from_setup(assignments: &[FrLocal], setup: SetupFile) -> ProofFile {
+        let weights = groth16::weights(&setup.code, assignments).unwrap();
+
+        let proof = groth16::prove(&setup.qap, (&setup.sigmag1, &setup.sigmag2), &weights);
+        return ProofFile {check: CHECK, proof: proof};
+    }
+
+    pub fn from_setup_file(assignments: &[FrLocal], setup_path: std::path::PathBuf) -> ProofFile
     // where F: Clone + zksnark::field::Field + FromStr + PartialEq, 
     {
+        let setup = SetupFile::from_file(setup_path);
+        return ProofFile::from_setup(assignments, setup);
+    }
 
-    let setup: SetupFile = read_bin_file(setup_path);
-    let weights = groth16::weights(&setup.code, assignments).unwrap();
+    pub fn from_file(proof_path: std::path::PathBuf) -> ProofFile {
+        return read_bin_file(proof_path)
+    }
 
-    let proof = groth16::prove(&setup.qap, (&setup.sigmag1, &setup.sigmag2), &weights);
-    let proof_file = ProofFile {check: CHECK, proof: proof};
-    let encoded =  proof_file.try_to_vec().unwrap();
-    do_binary_output(output_path, encoded);
-}
-}
-
-fn verify(assignments: &[FrLocal], setup_path: std::path::PathBuf, proof_path: std::path::PathBuf) -> bool {
-    let setup: SetupFile = read_bin_file(setup_path);
-    let proof: ProofFile = read_bin_file(proof_path);
-    return groth16::verify::<CoefficientPoly<FrLocal>, _, _, _, _> (
-        (setup.sigmag1, setup.sigmag2),
-        assignments,
-        proof.proof
-    );
+    pub fn to_file(&self, output_path: std::path::PathBuf) {
+        let encoded =  self.try_to_vec().unwrap();
+        do_binary_output(output_path, encoded);
+    }
 }
 
 #[cfg(test)]
@@ -128,30 +142,30 @@ mod tests {
 
     #[test]
     fn try_setup_test() {
-        setup(PathBuf::from("../test_programs/simple.zk"), PathBuf::from("simple.setup.bin"));
+        SetupFile::from_zk_file(PathBuf::from("test_programs/simple.zk")).to_file(PathBuf::from("output/simple.setup.bin"));
         assert!(true);
     }
 
     #[test]
     fn try_read_setup_test() {
-        let setup: SetupFile = read_bin_file(PathBuf::from("simple.setup.bin"));
+        let setup: SetupFile = SetupFile::from_file(PathBuf::from("output/simple.setup.bin"));
         assert!(setup.check == CHECK)
     }
 
     #[test]
     fn try_proof_test() {
-        proof(&input_assignments(), PathBuf::from("simple.setup.bin"), PathBuf::from("simple.proof.bin"));
+        ProofFile::from_setup_file(&input_assignments(), PathBuf::from("output/simple.setup.bin")).to_file(PathBuf::from("output/simple.proof.bin"));
         assert!(true);
     }
 
     #[test]
     fn try_verify_test() {
-        assert!(verify(&output_assignments(), PathBuf::from("simple.setup.bin"), PathBuf::from("simple.proof.bin")));
+        assert!(SetupFile::from_file(PathBuf::from("output/simple.setup.bin")).verify_from_file(&output_assignments(), PathBuf::from("output/simple.proof.bin")));
     }
 
     #[test]
     fn try_read_proof_test() {
-        let setup: ProofFile = read_bin_file(PathBuf::from("simple.proof.bin"));
+        let setup: ProofFile = ProofFile::from_file(PathBuf::from("output/simple.proof.bin"));
         assert!(setup.check == CHECK)
     }
 }

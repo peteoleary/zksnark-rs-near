@@ -12,11 +12,14 @@ use groth16::circuit::{ASTParser, TryParse};
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
+extern crate serde;
+use self::serde::{Serialize, Deserialize};
+
 use super::setup_file::{SetupFile, CHECK, do_binary_output, read_bin_file};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize)]
 pub struct ProofFile {
-    check: u32,
+    pub check: u32,
     pub proof: Proof<G1Local, G2Local>
 }
 

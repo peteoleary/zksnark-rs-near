@@ -1,9 +1,9 @@
 {
-  "name": "zksnark-rs-near",
+  "name": "zksnark-rs-near-contracts",
   "version": "1.0.0",
   "description": "Compiles NEAR Protocol example of setting and retrieving a status message per NEAR account",
   "scripts": {
     "build": "rustup target add wasm32-unknown-unknown && cargo build --target wasm32-unknown-unknown --release",
-    "postbuild": "cp ./target/wasm32-unknown-unknown/release/zksnark.wasm ./res/"
+    "postbuild": "cp ./target/wasm32-unknown-unknown/release/*.wasm ./res/"
   }
 }

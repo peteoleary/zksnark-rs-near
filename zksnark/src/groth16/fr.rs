@@ -7,17 +7,19 @@ use std::str::FromStr;
 
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
+extern crate serde;
+use self::serde::{Serialize, Deserialize};
 
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct FrLocal(Fr);
 
-#[derive(Clone, Copy, PartialEq)]
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct G1Local(G1);
-#[derive(Clone, Copy, PartialEq)]
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct G2Local(G2);
 #[derive(PartialEq)]
 pub struct GtLocal(Gt);

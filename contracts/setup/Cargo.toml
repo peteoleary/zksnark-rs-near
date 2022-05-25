@@ -5,8 +5,19 @@ authors = ["Near Inc <hello@nearprotocol.com>"]
 edition = "2018"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 zksnark = { path = "../../zksnark" }
-near-sdk = "3"
+near-sdk = "4"
+borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
+
+[profile.release]
+codegen-units = 1
+# Tell `rustc` to optimize for small code size.
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+# Opt into extra safety checks on arithmetic operations https://stackoverflow.com/a/64136471/249801
+overflow-checks = true

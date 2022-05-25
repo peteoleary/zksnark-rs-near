@@ -12,11 +12,12 @@ repository = "https://github.com/republicprotocol/zksnark-rs"
 [dependencies]
 itertools = "0.6.0"
 rand = "0.8.5"
-rabe-bn = { version = "0.4.20", path = "../../rabe-bn" }
+rabe-bn = { version = "0.4.20", path = "../../rabe-bn", features = ["borsh", "serde"] }
 bigint = "4.4.0"
 crunchy = "*"
 borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
 getrandom = { version = "0.2", features = ["js"] }
+serde = "1.0.137"
 
 [dev-dependencies]
 quickcheck = "0.7.1"

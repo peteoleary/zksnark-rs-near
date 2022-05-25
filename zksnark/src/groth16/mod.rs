@@ -22,6 +22,9 @@ pub use self::fr::FrLocal;
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
+extern crate serde;
+use self::serde::{Serialize, Deserialize};
+
 /// Represents that a type can produce a random element of itself.
 pub trait Random {
     fn random_elem() -> Self;
@@ -60,7 +63,7 @@ pub trait Identity {
 
 /// The Quadratic Arithmetic Program (QAP) that represents an arithmetic
 /// circuit.
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
 pub struct QAP<P> {
     u: Vec<P>,
     v: Vec<P>,
@@ -106,8 +109,8 @@ where
 }
 
 /// The G1 part of the common reference string (CRS)
-#[derive(Clone, PartialEq)]
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(Clone, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct SigmaG1<T> {
     alpha: T,
     beta: T,
@@ -119,8 +122,8 @@ pub struct SigmaG1<T> {
 }
 
 /// The G2 part of the common reference string (CRS)
-#[derive(Clone, PartialEq)]
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(Clone, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct SigmaG2<T> {
     beta: T,
     gamma: T,
@@ -129,7 +132,7 @@ pub struct SigmaG2<T> {
 }
 
 /// The proof produced by the ZKSNARK algorithm.
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
 pub struct Proof<U, V> {
     a: U,
     b: V,

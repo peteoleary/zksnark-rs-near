@@ -12,6 +12,9 @@ use groth16::circuit::{ASTParser, TryParse};
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
+extern crate serde;
+use self::serde::{Serialize, Deserialize};
+
 use super::proof_file::{ProofFile};
 
 fn do_string_output(output_path: Option<std::path::PathBuf>, output_string: String) {
@@ -41,9 +44,9 @@ pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
 // in unit tests
 pub const CHECK: u32 = 0xABAD1DEA;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize)]
 pub struct SetupFile {
-    check: u32,
+    pub check: u32,
     pub code: String,
     pub qap: QAP<CoefficientPoly<FrLocal>>,
     pub sigmag1: SigmaG1<G1Local>,
@@ -139,30 +142,3 @@ mod tests {
         assert!(setup.check == CHECK)
     }
 }
-
-#[cfg(not(target_arch = "wasm32"))]
-#[cfg(test)]
-mod near_tests {
-    use super::*;
-    use std::path::PathBuf;
-    use super::near_sdk::test_utils::{get_logs, VMContextBuilder};
-    use super::near_sdk::{testing_env, VMContext};
-
-    fn get_context(is_view: bool) -> VMContext {
-        VMContextBuilder::new()
-            .signer_account_id("bob_near".parse().unwrap())
-            .is_view(is_view)
-            .build()
-    }
-
-    #[test]
-    fn set_get_message() {
-        let context = get_context(false);
-        testing_env!(context);
-
-        let setup: SetupFile = SetupFile::from_file(PathBuf::from("output/simple.setup.bin"));
-
-        assert_eq!(get_logs(), vec!["bob_near set_status with message hello"]);
-    }
-}
-

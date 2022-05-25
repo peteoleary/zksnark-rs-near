@@ -1,4 +1,7 @@
 .vscode
+/contracts/target
+/zksnark/target
+/zksnark/cli
 /target
 **/*.rs.bk
 Cargo.lock
@@ -8,3 +11,4 @@ Cargo.lock
 .envrc
 .direnv*
 /cli/target
+/neardev

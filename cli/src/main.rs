@@ -4,7 +4,8 @@ use std::str::FromStr;
 use clap::{Parser, Subcommand};
 
 use zksnark::groth16::fr::FrLocal;
-use zksnark::serialization::{SetupFile, ProofFile};
+use zksnark::setup_file::{SetupFile};
+use zksnark::proof_file::{ProofFile};
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Debug, Parser)]

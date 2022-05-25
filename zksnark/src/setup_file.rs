@@ -9,9 +9,6 @@ use groth16::fr::{G1Local, G2Local, Proof, QAP, FrLocal};
 use groth16::coefficient_poly::{CoefficientPoly};
 use groth16::circuit::{ASTParser, TryParse};
 
-extern crate near_sdk;
-use self::near_sdk::{env, log, metadata, near_bindgen, AccountId};
-
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
@@ -44,7 +41,6 @@ pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
 // in unit tests
 pub const CHECK: u32 = 0xABAD1DEA;
 
-#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct SetupFile {
     check: u32,

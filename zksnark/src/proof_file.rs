@@ -9,15 +9,11 @@ use groth16::fr::{G1Local, G2Local, Proof, QAP, FrLocal};
 use groth16::coefficient_poly::{CoefficientPoly};
 use groth16::circuit::{ASTParser, TryParse};
 
-extern crate near_sdk;
-use self::near_sdk::{env, log, metadata, near_bindgen, AccountId};
-
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
 use super::setup_file::{SetupFile, CHECK, do_binary_output, read_bin_file};
 
-#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct ProofFile {
     check: u32,

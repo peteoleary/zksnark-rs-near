@@ -1,0 +1,40 @@
+[profile.dev]
+opt-level = 3
+
+[package]
+name = "zksnark"
+description = "An implementation of zkSNARK using groth16."
+version = "0.0.2"
+authors = ["Ross", "Pfalzgraf"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/republicprotocol/zksnark-rs"
+
+[dependencies]
+itertools = "0.6.0"
+rand = "0.8.5"
+rabe-bn = { version = "0.4.20", path = "../../rabe-bn" }
+bigint = "4.4.0"
+crunchy = "*"
+borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
+getrandom = { version = "0.2", features = ["js"] }
+
+[dev-dependencies]
+quickcheck = "0.7.1"
+tiny-keccak = "1.0"
+
+[profile.test]
+opt-level = 3
+
+[package.metadata.docs.rs]
+all-features = true
+
+[profile.release]
+codegen-units = 1
+# Tell `rustc` to optimize for small code size.
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+# Opt into extra safety checks on arithmetic operations https://stackoverflow.com/a/64136471/249801
+overflow-checks = true
+

@@ -6,6 +6,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "3.0", features = ["derive"] }
-zksnark = { version = "^0", path = ".." }
-borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
+clap = { version = "^3", features = ["derive"] }
+zksnark = { version = "^0", path = "../zksnark" }

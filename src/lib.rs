@@ -128,7 +128,8 @@ mod encryption;
 pub mod field;
 pub mod groth16;
 
-pub mod serialization;
+pub mod proof_file;
+pub mod setup_file;
 
 #[doc(hidden)]
 pub use groth16::circuit::dummy_rep::DummyRep;

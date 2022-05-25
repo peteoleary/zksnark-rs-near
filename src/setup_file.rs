@@ -9,8 +9,13 @@ use groth16::fr::{G1Local, G2Local, Proof, QAP, FrLocal};
 use groth16::coefficient_poly::{CoefficientPoly};
 use groth16::circuit::{ASTParser, TryParse};
 
+extern crate near_sdk;
+use self::near_sdk::{env, log, metadata, near_bindgen, AccountId};
+
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
+
+use super::proof_file::{ProofFile};
 
 fn do_string_output(output_path: Option<std::path::PathBuf>, output_string: String) {
 
@@ -24,28 +29,29 @@ fn do_string_output(output_path: Option<std::path::PathBuf>, output_string: Stri
     out_writer.write_all(output_string.as_bytes());
 }
 
-fn do_binary_output(output_path: std::path::PathBuf,  buf: Vec<u8>) -> File {
+pub fn do_binary_output(output_path: std::path::PathBuf,  buf: Vec<u8>) -> File {
     let mut file = File::create(&output_path).unwrap();
     file.write_all(&buf);
     return file
 }
 
-fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
+pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
     let setup_bin = &*::std::fs::read(setup_path).unwrap();
     return V::try_from_slice(setup_bin).unwrap();
 }
 
 // arbitrary check value addeed to the *File structs so that we can ensure they are deserialized correctly
 // in unit tests
-const CHECK: u32 = 0xABAD1DEA;
+pub const CHECK: u32 = 0xABAD1DEA;
 
+#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct SetupFile {
     check: u32,
-    code: String,
-    qap: QAP<CoefficientPoly<FrLocal>>,
-    sigmag1: SigmaG1<G1Local>,
-    sigmag2: SigmaG2<G2Local>
+    pub code: String,
+    pub qap: QAP<CoefficientPoly<FrLocal>>,
+    pub sigmag1: SigmaG1<G1Local>,
+    pub sigmag2: SigmaG2<G2Local>
 }
 
 impl SetupFile {
@@ -85,38 +91,6 @@ impl SetupFile {
 
     pub fn from_file(setup_path: std::path::PathBuf) -> SetupFile {
         return read_bin_file(setup_path)
-    }
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
-pub struct ProofFile {
-    check: u32,
-    proof: Proof<G1Local, G2Local>
-}
-
-impl ProofFile {
-    
-    pub fn from_setup(assignments: &[FrLocal], setup: SetupFile) -> ProofFile {
-        let weights = groth16::weights(&setup.code, assignments).unwrap();
-
-        let proof = groth16::prove(&setup.qap, (&setup.sigmag1, &setup.sigmag2), &weights);
-        return ProofFile {check: CHECK, proof: proof};
-    }
-
-    pub fn from_setup_file(assignments: &[FrLocal], setup_path: std::path::PathBuf) -> ProofFile
-    // where F: Clone + zksnark::field::Field + FromStr + PartialEq, 
-    {
-        let setup = SetupFile::from_file(setup_path);
-        return ProofFile::from_setup(assignments, setup);
-    }
-
-    pub fn from_file(proof_path: std::path::PathBuf) -> ProofFile {
-        return read_bin_file(proof_path)
-    }
-
-    pub fn to_file(&self, output_path: std::path::PathBuf) {
-        let encoded =  self.try_to_vec().unwrap();
-        do_binary_output(output_path, encoded);
     }
 }
 
@@ -169,3 +143,30 @@ mod tests {
         assert!(setup.check == CHECK)
     }
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(test)]
+mod near_tests {
+    use super::*;
+    use std::path::PathBuf;
+    use super::near_sdk::test_utils::{get_logs, VMContextBuilder};
+    use super::near_sdk::{testing_env, VMContext};
+
+    fn get_context(is_view: bool) -> VMContext {
+        VMContextBuilder::new()
+            .signer_account_id("bob_near".parse().unwrap())
+            .is_view(is_view)
+            .build()
+    }
+
+    #[test]
+    fn set_get_message() {
+        let context = get_context(false);
+        testing_env!(context);
+
+        let setup: SetupFile = SetupFile::from_file(PathBuf::from("output/simple.setup.bin"));
+
+        assert_eq!(get_logs(), vec!["bob_near set_status with message hello"]);
+    }
+}
+

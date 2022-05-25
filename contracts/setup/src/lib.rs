@@ -3,6 +3,7 @@ use self::near_sdk::{metadata, near_bindgen};
 
 use borsh::{BorshSerialize, BorshDeserialize};
 
+use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile, CHECK};
 use zksnark::proof_file::{ProofFile};
 
@@ -14,8 +15,8 @@ struct SetupContract {
 
 #[near_bindgen]
 impl SetupContract {
-    pub fn verify(proof_file: ProofFile) {
-
+    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
+        return self.verify(assignments, proof)
     }
 }
 

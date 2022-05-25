@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 zksnark = { path = "../../zksnark" }
 near-sdk = "4"
 borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
+js-sys = "0.3.50"
 
 [profile.release]
 codegen-units = 1

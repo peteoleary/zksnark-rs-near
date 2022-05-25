@@ -6,7 +6,6 @@ use borsh::{BorshSerialize, BorshDeserialize};
 use zksnark::setup_file::{SetupFile, CHECK};
 use zksnark::proof_file::{ProofFile};
 
-metadata! {
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
 #[near_bindgen]
 struct SetupContract {
@@ -18,7 +17,6 @@ impl SetupContract {
     pub fn verify(proof_file: ProofFile) {
 
     }
-}
 }
 
 #[cfg(not(target_arch = "wasm32"))]

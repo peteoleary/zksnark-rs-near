@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
 
+extern crate zksnark;
 use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile};
 use zksnark::proof_file::{ProofFile};

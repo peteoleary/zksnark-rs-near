@@ -8,11 +8,12 @@ use zksnark::setup_file::{SetupFile, CHECK};
 use zksnark::FrLocal;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug)]
-
-struct ProofContract {
+#[near_bindgen]
+pub struct ProofContract {
     proof_file: ProofFile
 }
 
+#[near_bindgen]
 impl ProofContract {
 }
 

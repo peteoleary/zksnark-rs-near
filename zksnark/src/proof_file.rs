@@ -17,7 +17,7 @@ use self::serde::{Serialize, Deserialize};
 
 use super::setup_file::{SetupFile, CHECK, do_binary_output, read_bin_file};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
 pub struct ProofFile {
     pub check: u32,
     pub proof: Proof<G1Local, G2Local>

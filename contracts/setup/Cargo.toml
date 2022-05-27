@@ -9,6 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 zksnark = { path = "../../zksnark" }
+proof = {path = "../proof"}
 near-sdk = "4"
 borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
 js-sys = "0.3.50"

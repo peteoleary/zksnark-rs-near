@@ -63,7 +63,7 @@ pub trait Identity {
 
 /// The Quadratic Arithmetic Program (QAP) that represents an arithmetic
 /// circuit.
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
 pub struct QAP<P> {
     u: Vec<P>,
     v: Vec<P>,
@@ -132,7 +132,7 @@ pub struct SigmaG2<T> {
 }
 
 /// The proof produced by the ZKSNARK algorithm.
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
 pub struct Proof<U, V> {
     a: U,
     b: V,

@@ -44,7 +44,7 @@ pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
 // in unit tests
 pub const CHECK: u32 = 0xABAD1DEA;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
 pub struct SetupFile {
     pub check: u32,
     pub code: String,

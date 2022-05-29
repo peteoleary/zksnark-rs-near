@@ -12,3 +12,15 @@ Cargo.lock
 .direnv*
 /cli/target
 /neardev
+
+.DS_Store
+contracts/.DS_Store
+contracts/neardev/
+contracts/node_modules/
+contracts/package-lock.json
+contracts/setup/.DS_Store
+contracts/setup/target/
+contracts/simple/.DS_Store
+contracts/simple/neardev/
+contracts/simple/target/
+contracts/yarn.lock

@@ -59,7 +59,7 @@ mod tests {
     ";
 
     #[test]
-    fn setup_proof() {
+    fn setup_proof_from_file_test() {
         let context = get_context(false);
         testing_env!(context);
         let setup_file = SetupFile::from_zk(TEST_ZK);

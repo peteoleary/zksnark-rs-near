@@ -44,7 +44,7 @@ pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
 // in unit tests
 pub const CHECK: u32 = 0xABAD1DEA;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SetupFile {
     pub check: u32,
     pub code: String,
@@ -54,6 +54,16 @@ pub struct SetupFile {
 }
 
 impl SetupFile {
+
+    pub fn default () -> Self {
+        Self {
+            check: 0x0,
+            code: String::new(),
+            qap: QAP::default(),
+            sigmag1: SigmaG1::default(),
+            sigmag2: SigmaG2::default()
+        }
+    }
 
     pub fn from_zk(code: &str) -> SetupFile {
         let qap: QAP<CoefficientPoly<FrLocal>> = ASTParser::try_parse(code).unwrap().into();

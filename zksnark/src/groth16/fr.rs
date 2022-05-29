@@ -11,14 +11,14 @@ extern crate serde;
 use self::serde::{Serialize, Deserialize};
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Default)]
 pub struct FrLocal(Fr);
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct G1Local(G1);
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct G2Local(G2);
 #[derive(PartialEq)]

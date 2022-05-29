@@ -3,3 +3,4 @@ members = [
   "proof",
   "setup"
 ]
+exclude=['simple']

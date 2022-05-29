@@ -63,7 +63,7 @@ pub trait Identity {
 
 /// The Quadratic Arithmetic Program (QAP) that represents an arithmetic
 /// circuit.
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct QAP<P> {
     u: Vec<P>,
     v: Vec<P>,
@@ -109,7 +109,7 @@ where
 }
 
 /// The G1 part of the common reference string (CRS)
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Default)]
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct SigmaG1<T> {
     alpha: T,
@@ -122,7 +122,7 @@ pub struct SigmaG1<T> {
 }
 
 /// The G2 part of the common reference string (CRS)
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Default)]
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct SigmaG2<T> {
     beta: T,

@@ -7,15 +7,34 @@ use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile, CHECK};
 use zksnark::proof_file::{ProofFile};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, PanicOnDefault)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Default)]
 #[near_bindgen]
 struct SetupContract {
     setup_file: SetupFile
 }
 
 impl SetupContract {
+
+    pub fn default () -> Self {
+        Self {
+            setup_file: SetupFile::default()
+        }
+    }
+
     pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
         return self.setup_file.verify(assignments, proof)
+    }
+
+    pub fn from_zk(code: &str) -> Self {
+        Self {
+            setup_file: SetupFile::from_zk(code)
+        }        
+    }
+
+    pub fn from_setup(setup_file: SetupFile) -> Self {
+        Self {
+            setup_file: setup_file
+        }        
     }
 }
 
@@ -65,7 +84,7 @@ mod tests {
     fn setup_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = SetupContract { setup_file: SetupFile::from_zk(TEST_ZK)};
+        let contract = SetupContract::from_zk(TEST_ZK);
         assert_eq!(
             contract.setup_file.check,
             CHECK
@@ -80,9 +99,26 @@ mod tests {
         let setup_contract = SetupContract { setup_file: setup_file.clone()};
         
         let proof_file =  ProofFile::from_setup(&input_assignments(), setup_file);
-        // let proof_contract = ProofContract {proof_file: proof_file};
-
 
         assert!(setup_contract.verify(&output_assignments(), proof_file))
     }
+
+    use workspaces::prelude::*;
+
+    #[tokio::test]
+    async fn test_cross_contract() -> anyhow::Result<()> {
+        let worker = workspaces::sandbox().await?;
+        let contract = worker.dev_deploy(&std::fs::read(format!("../res/setup.wasm"))?).await?;
+
+        let res = contract
+            .call(&worker, "from_zk")
+            .args_json(TEST_ZK)?
+            .gas(300_000_000_000_000)
+            .transact()
+            .await?;
+        assert!(res.is_success());
+
+        Ok(())
+    }
+
 }

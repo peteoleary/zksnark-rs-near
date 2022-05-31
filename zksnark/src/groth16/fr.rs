@@ -5,10 +5,9 @@ use self::bn::{Fr, Group, Gt, G1, G2};
 pub use super::*;
 use std::str::FromStr;
 
-extern crate borsh;
-use self::borsh::{BorshSerialize, BorshDeserialize};
-extern crate serde;
-use self::serde::{Serialize, Deserialize};
+extern crate near_sdk;
+use self::near_sdk::borsh::{BorshSerialize, BorshDeserialize};
+use self::near_sdk::serde::{Serialize, Deserialize};
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Default)]

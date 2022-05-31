@@ -1,18 +1,19 @@
 extern crate near_sdk;
-use self::near_sdk::{metadata, near_bindgen, PanicOnDefault};
-
-use near_sdk::borsh::{BorshSerialize, BorshDeserialize};
+use near_sdk::{metadata, near_bindgen, PanicOnDefault};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{self, Deserialize, Serialize};
 
 use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile, CHECK};
 use zksnark::proof_file::{ProofFile};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Default)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Default, Serialize, Deserialize)]
 #[near_bindgen]
 struct SetupContract {
     setup_file: SetupFile
 }
 
+#[near_bindgen]
 impl SetupContract {
 
     pub fn default () -> Self {
@@ -21,11 +22,11 @@ impl SetupContract {
         }
     }
 
-    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
+    pub fn verify(&self, assignments: &Box<[FrLocal]>, proof: ProofFile) -> bool {
         return self.setup_file.verify(assignments, proof)
     }
 
-    pub fn from_zk(code: &str) -> Self {
+    pub fn from_zk(code: &String) -> Self {
         Self {
             setup_file: SetupFile::from_zk(code)
         }        
@@ -42,7 +43,6 @@ impl SetupContract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use proof::{ProofContract};
     use near_sdk::test_utils::{get_logs, VMContextBuilder};
     use near_sdk::{testing_env, VMContext};
 

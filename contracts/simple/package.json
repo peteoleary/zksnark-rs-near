@@ -4,6 +4,8 @@
   "description": "Compiles NEAR Protocol example of setting and retrieving a status message per NEAR account",
   "scripts": {
     "build": "rustup target add wasm32-unknown-unknown && cargo build --target wasm32-unknown-unknown --release",
+    "deploy": "near dev-deploy --wasmFile ../res/simple.wasm --helperUrl https://near-contract-helper.onrender.com",
+    "clean-deploy": "rm -rf neardev && near dev-deploy --wasmFile ../res/simple.wasm --helperUrl https://near-contract-helper.onrender.com && echo 'NOTE: source neardev/dev-account.env'",
     "postbuild": "cp ./target/wasm32-unknown-unknown/release/*.wasm ../res/"
   }
 }

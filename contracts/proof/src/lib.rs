@@ -1,7 +1,6 @@
 extern crate near_sdk;
-use self::near_sdk::{env, log, metadata, near_bindgen, AccountId};
-
-use borsh::{BorshSerialize, BorshDeserialize};
+use near_sdk::{metadata, near_bindgen, PanicOnDefault};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
 use zksnark::proof_file::{ProofFile};
 use zksnark::setup_file::{SetupFile, CHECK};

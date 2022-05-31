@@ -1,31 +1,46 @@
 extern crate near_sdk;
-use self::near_sdk::{metadata, near_bindgen, PanicOnDefault};
-
+use near_sdk::{metadata, near_bindgen, PanicOnDefault};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+extern crate simple_lib;
+
+use self::simple_lib::SimpleStruct;
+
+// extern crate rabe_bn as bn;
+// use self::bn::{G1};
+
+type Nothing = SimpleStruct;
+
 #[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 struct SimpleContract {
-    nothing: u16
+    nothing: Nothing
 }
 
 impl Default for SimpleContract {
     fn default () -> Self {
         Self {
-            nothing: 0
+            
+            nothing: Nothing::default()
         }
     }
 }
 
+#[near_bindgen]
 impl SimpleContract {
 
-    pub fn get_nothing(&self) -> u16 {
+    pub fn get_nothing(&self) -> Nothing {
         return self.nothing
     }
 
-    pub fn get_something(&self, add: u16) -> u16 {
-        return self.nothing + add;
+    pub fn get_random(&self) -> Nothing {
+        return self.nothing.random()
     }
+
+    pub fn get_something(&self, something: Nothing) -> Nothing {
+        return self.nothing.add(&something);
+    }
+
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -40,22 +55,6 @@ mod tests {
             .signer_account_id("bob_near".parse().unwrap())
             .is_view(is_view)
             .build()
-    }
-
-
-    #[test]
-    fn setup_test() {
-        let context = get_context(false);
-        testing_env!(context);
-        let contract = SimpleContract::default();
-        assert_eq!(
-            contract.get_nothing(),
-            0
-        );
-        assert_eq!(
-            contract.get_something(10),
-            10
-        );
     }
 
 }

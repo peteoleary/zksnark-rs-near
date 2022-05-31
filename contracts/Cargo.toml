@@ -4,3 +4,6 @@ members = [
   "setup"
 ]
 exclude=['simple']
+
+[patch.crates-io]
+getrandom = { path = "../../getrandom" }

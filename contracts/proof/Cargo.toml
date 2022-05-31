@@ -7,11 +7,20 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[patch.crates-io]
+getrandom = { path = "../../getrandom" }
+
 [dependencies]
+getrandom = { version="0.2.6", features = ["noop"] }
 zksnark = { path = "../../zksnark" }
 near-sdk = "4"
-borsh = { git = "https://github.com/near/borsh-rs", branch = "master" }
-js-sys = "0.3.50"
+
+[dev-dependencies]
+anyhow = "1.0"
+near-units = "0.2.0"
+test-case = "2.0"
+tokio = { version = "1.14", features = ["full"] }
+workspaces = "0.3"
 
 [profile.release]
 codegen-units = 1

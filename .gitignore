@@ -24,3 +24,4 @@ contracts/simple/.DS_Store
 contracts/simple/neardev/
 contracts/simple/target/
 contracts/yarn.lock
+contracts/proof/target/

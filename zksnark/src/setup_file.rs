@@ -9,6 +9,9 @@ use groth16::fr::{G1Local, G2Local, Proof, QAP, FrLocal};
 use groth16::coefficient_poly::{CoefficientPoly};
 use groth16::circuit::{ASTParser, TryParse};
 
+extern crate hex;
+use self::hex::FromHex;
+
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
 
@@ -65,6 +68,11 @@ impl SetupFile {
         }
     }
 
+    pub fn from_hex_string(hex_string: String) -> Self {
+        let data = hex::decode(hex_string).unwrap();
+        return Self::try_from_slice(&data).unwrap();
+    }
+
     pub fn from_zk(code: &str) -> SetupFile {
         let qap: QAP<CoefficientPoly<FrLocal>> = ASTParser::try_parse(code).unwrap().into();
     
@@ -82,6 +90,11 @@ impl SetupFile {
     pub fn to_file(&self, output_path: std::path::PathBuf) {
         let encoded =  self.try_to_vec().unwrap();
         do_binary_output(output_path, encoded);
+    }
+
+    pub fn to_hex_string(&self) -> String {
+        let encoded =  self.try_to_vec().unwrap();
+        return hex::encode(encoded);
     }
 
     pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
@@ -131,19 +144,22 @@ mod tests {
 
     #[test]
     fn try_read_setup_test() {
-        let setup: SetupFile = SetupFile::from_file(PathBuf::from("output/simple.setup.bin"));
-        assert!(setup.check == CHECK)
+        let setup: SetupFile = SetupFile::from_file(PathBuf::from("../output/simple.setup.bin"));
+        assert!(setup.check == CHECK);
+        let setup_hex = setup.to_hex_string();
+        let setup_from_hex = SetupFile::from_hex_string(setup_hex);
+        assert!(setup_from_hex.check == CHECK);
     }
 
     #[test]
     fn try_proof_test() {
-        ProofFile::from_setup_file(&input_assignments(), PathBuf::from("output/simple.setup.bin")).to_file(PathBuf::from("output/simple.proof.bin"));
+        ProofFile::from_setup_file(&input_assignments(), PathBuf::from("../output/simple.setup.bin")).to_file(PathBuf::from("../output/simple.proof.bin"));
         assert!(true);
     }
 
     #[test]
     fn try_verify_test() {
-        assert!(SetupFile::from_file(PathBuf::from("output/simple.setup.bin")).verify_from_file(&output_assignments(), PathBuf::from("output/simple.proof.bin")));
+        assert!(SetupFile::from_file(PathBuf::from("../output/simple.setup.bin")).verify_from_file(&output_assignments(), PathBuf::from("../output/simple.proof.bin")));
     }
 
     #[test]

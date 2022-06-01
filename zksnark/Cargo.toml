@@ -18,6 +18,7 @@ crunchy = "*"
 borsh = { version = "0.9.3" }
 serde = "1.0.137"
 near-sdk = "4"
+hex = "0.4.3"
 
 [dev-dependencies]
 quickcheck = "0.7.1"

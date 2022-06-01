@@ -545,18 +545,7 @@ mod tests {
     use self::quickcheck::quickcheck;
 
     quickcheck! {
-        fn field_bits_u8_prop(vec: Vec<u8>) -> bool {
-            let field_bits: Vec<Z251> = to_field_bits(&vec);
-            vec == from_field_bits(&field_bits)
-        }
-        fn field_bits_u64_prop(vec: Vec<u64>) -> bool {
-            let field_bits: Vec<Z251> = to_field_bits(&vec);
-            vec == from_field_bits(&field_bits)
-        }
-        fn field_bits_i64_prop(vec: Vec<i64>) -> bool {
-            let field_bits: Vec<Z251> = to_field_bits(&vec);
-            vec == from_field_bits(&field_bits)
-        }
+        
 
         fn polynomial_evaluate_prop(vec: Vec<usize>, eval_at: usize) -> bool {
             let poly: Vec<Z251> = vec.into_iter().map(|x| Z251::from(x % 251)).collect();

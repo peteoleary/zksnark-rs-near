@@ -6,4 +6,4 @@ members = [
 exclude=['simple']
 
 [patch.crates-io]
-getrandom = { path = "../../getrandom" }
+getrandom = { git = "https://github.com/peteoleary/getrandom" }

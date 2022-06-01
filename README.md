@@ -23,8 +23,8 @@ The circuit language used in zksnark-rs is rather simple compared to Circom (htt
 * Get contracts working and calling each other
 * ~~Make sure CLI still working~~
 * Extend CLI to create and verify contracts
-* Add "why" to this README doc
-* Add references to other projects in this doc
+* ~~Add "why" to this README doc~~
+* ~~Add references to other projects in this doc~~
 * Copy in NEAR contract installation instructions
 * Add notes to zksnark project: switch to rabe-bin, serialization changes
 * Rename all packages in Cargo.toml file

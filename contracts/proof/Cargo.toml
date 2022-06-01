@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [patch.crates-io]
-getrandom = { path = "../../getrandom" }
+getrandom = { git = "https://github.com/peteoleary/getrandom" }
 
 [dependencies]
 getrandom = { version="0.2.6", features = ["noop"] }

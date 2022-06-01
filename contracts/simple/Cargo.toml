@@ -8,13 +8,13 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [patch.crates-io]
-getrandom = { path = "../../../getrandom" }
+getrandom = { git = "https://github.com/peteoleary/getrandom" }
 
 [dependencies]
 getrandom = { version="0.2.6", features = ["noop"] }
 near-sdk = "4"
 rabe-bn = { git = "https://github.com/peteoleary/rabe-bn", branch = "master" }
-simple_lib = { path = "../../../simple_lib" }
+simple_lib = { path = "../../simple_lib" }
 rand = "0.8.5"
 
 [profile.release]

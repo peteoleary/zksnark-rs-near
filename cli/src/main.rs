@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 
 extern crate zksnark;
 use zksnark::groth16::fr::FrLocal;
-use zksnark::setup_file::{SetupFile};
+use zksnark::setup_file::{SetupFile, Fileish};
 use zksnark::proof_file::{ProofFile};
 
 /// Search for a pattern in a file and display the lines that contain it.
@@ -41,6 +41,10 @@ enum Commands {
         #[clap(long, parse(from_os_str))]
         output_path: Option<std::path::PathBuf>
     },
+    ProofToHex {
+        #[clap(long, parse(from_os_str))]
+        proof_path: Option<std::path::PathBuf>
+    },
     Verify {
         #[clap(long)]
         assignments: Option<String>,
@@ -62,6 +66,11 @@ fn main() {
             let setup = SetupFile::from_file(setup_path.unwrap());
            
             println!("{}", setup.to_hex_string());
+        },
+        Commands::ProofToHex { proof_path }  => {
+            let proof = ProofFile::from_file(proof_path.unwrap());
+           
+            println!("{}", proof.to_hex_string());
         },
         Commands::Proof { assignments, setup_path, output_path }  => {
             ProofFile::from_setup_file(&parse_assignment_string(&assignments.unwrap()[..]), setup_path.unwrap()).to_file(output_path.unwrap());

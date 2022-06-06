@@ -4,7 +4,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{self, Deserialize, Serialize};
 
 use zksnark::groth16::fr::FrLocal;
-use zksnark::setup_file::{SetupFile, CHECK};
+use zksnark::setup_file::{SetupFile, CHECK, Fileish};
 use zksnark::proof_file::{ProofFile};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Default, Serialize, Deserialize)]
@@ -22,7 +22,7 @@ impl SetupContract {
         }
     }
 
-    pub fn verify(&self, assignments: &Box<[FrLocal]>, proof: ProofFile) -> bool {
+    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
         return self.setup_file.verify(assignments, proof)
     }
 
@@ -49,7 +49,7 @@ impl SetupContract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_sdk::test_utils::{get_logs, VMContextBuilder};
+    use near_sdk::test_utils::{VMContextBuilder};
     use near_sdk::{testing_env, VMContext};
 
     fn get_context(is_view: bool) -> VMContext {
@@ -92,7 +92,7 @@ mod tests {
     fn from_zk_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = SetupContract::from_zk(TEST_ZK);
+        let contract = SetupContract::from_zk(&String::from(TEST_ZK));
         assert_eq!(
             contract.setup_file.check,
             CHECK
@@ -103,7 +103,7 @@ mod tests {
     fn from_hex_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = SetupContract::from_hex_string(TEST_HEX);
+        let contract = SetupContract::from_hex_string(&String::from(TEST_HEX));
         assert_eq!(
             contract.setup_file.check,
             CHECK

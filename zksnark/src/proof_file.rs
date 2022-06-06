@@ -15,12 +15,15 @@ use self::borsh::{BorshSerialize, BorshDeserialize};
 extern crate serde;
 use self::serde::{Serialize, Deserialize};
 
-use super::setup_file::{SetupFile, CHECK, do_binary_output, read_bin_file};
+use super::setup_file::{SetupFile, CHECK, Fileish};
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
 pub struct ProofFile {
     pub check: u32,
     pub proof: Proof<G1Local, G2Local>
+}
+
+impl Fileish for ProofFile {
 }
 
 impl ProofFile {
@@ -40,11 +43,11 @@ impl ProofFile {
     }
 
     pub fn from_file(proof_path: std::path::PathBuf) -> ProofFile {
-        return read_bin_file(proof_path)
+        return Self::read_bin_file(proof_path)
     }
 
     pub fn to_file(&self, output_path: std::path::PathBuf) {
         let encoded =  self.try_to_vec().unwrap();
-        do_binary_output(output_path, encoded);
+        Self::do_binary_output(output_path, encoded);
     }
 }

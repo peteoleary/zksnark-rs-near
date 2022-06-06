@@ -10,7 +10,6 @@ use groth16::coefficient_poly::{CoefficientPoly};
 use groth16::circuit::{ASTParser, TryParse};
 
 extern crate hex;
-use self::hex::FromHex;
 
 extern crate borsh;
 use self::borsh::{BorshSerialize, BorshDeserialize};
@@ -20,27 +19,50 @@ use self::serde::{Serialize, Deserialize};
 
 use super::proof_file::{ProofFile};
 
-fn do_string_output(output_path: Option<std::path::PathBuf>, output_string: String) {
+pub trait Fileish where Self: Sized + Serialize + BorshSerialize + BorshDeserialize {
+    fn do_string_output(output_path: Option<std::path::PathBuf>, output_string: String) {
 
-    let mut out_writer = match output_path {
-        Some(x) => {
-            Box::new(File::create(&x).unwrap()) as Box<dyn Write>
-        }
-        None => Box::new(stdout()) as Box<dyn Write>,
-    };
+        let mut out_writer = match output_path {
+            Some(x) => {
+                Box::new(File::create(&x).unwrap()) as Box<dyn Write>
+            }
+            None => Box::new(stdout()) as Box<dyn Write>,
+        };
+        out_writer.write_all(output_string.as_bytes());
+    }
     
-    out_writer.write_all(output_string.as_bytes());
+    fn do_binary_output(output_path: std::path::PathBuf,  buf: Vec<u8>) -> File {
+        let mut file = File::create(&output_path).unwrap();
+        file.write_all(&buf);
+        return file
+    }
+    
+    fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
+        let setup_bin = &*::std::fs::read(setup_path).unwrap();
+        return V::try_from_slice(setup_bin).unwrap();
+    }
+
+    fn from_hex_string(hex_string: String) -> Self {
+        let data = hex::decode(hex_string).unwrap();
+        return Self::try_from_slice(&data).unwrap();
+    }
+
+    fn to_hex_string(&self) -> String {
+        let encoded =  self.try_to_vec().unwrap();
+        return hex::encode(encoded);
+    }
+
+    fn to_file(&self, output_path: std::path::PathBuf) {
+        let encoded =  self.try_to_vec().unwrap();
+        Self::do_binary_output(output_path, encoded);
+    }
+
+    fn from_file(setup_path: std::path::PathBuf) -> Self {
+        return Self::read_bin_file(setup_path)
+    }
 }
 
-pub fn do_binary_output(output_path: std::path::PathBuf,  buf: Vec<u8>) -> File {
-    let mut file = File::create(&output_path).unwrap();
-    file.write_all(&buf);
-    return file
-}
-
-pub fn read_bin_file<V: BorshDeserialize>(setup_path: std::path::PathBuf) -> V {
-    let setup_bin = &*::std::fs::read(setup_path).unwrap();
-    return V::try_from_slice(setup_bin).unwrap();
+impl Fileish for SetupFile {
 }
 
 // arbitrary check value addeed to the *File structs so that we can ensure they are deserialized correctly
@@ -68,11 +90,6 @@ impl SetupFile {
         }
     }
 
-    pub fn from_hex_string(hex_string: String) -> Self {
-        let data = hex::decode(hex_string).unwrap();
-        return Self::try_from_slice(&data).unwrap();
-    }
-
     pub fn from_zk(code: &str) -> SetupFile {
         let qap: QAP<CoefficientPoly<FrLocal>> = ASTParser::try_parse(code).unwrap().into();
     
@@ -87,16 +104,6 @@ impl SetupFile {
         return SetupFile::from_zk(code);
     }
 
-    pub fn to_file(&self, output_path: std::path::PathBuf) {
-        let encoded =  self.try_to_vec().unwrap();
-        do_binary_output(output_path, encoded);
-    }
-
-    pub fn to_hex_string(&self) -> String {
-        let encoded =  self.try_to_vec().unwrap();
-        return hex::encode(encoded);
-    }
-
     pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
         let sigmas = (self.sigmag1.clone(), self.sigmag2.clone());
         return groth16::verify::<CoefficientPoly<FrLocal>, _, _, _, _> (
@@ -107,12 +114,8 @@ impl SetupFile {
     }
 
     pub fn verify_from_file(&self, assignments: &[FrLocal], proof_path: std::path::PathBuf) -> bool {
-        let proof: ProofFile = read_bin_file(proof_path);
+        let proof: ProofFile = Self::read_bin_file(proof_path);
         return self.verify(assignments, proof)
-    }
-
-    pub fn from_file(setup_path: std::path::PathBuf) -> SetupFile {
-        return read_bin_file(setup_path)
     }
 }
 

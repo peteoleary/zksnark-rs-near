@@ -7,7 +7,7 @@ use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile, CHECK, Fileish};
 use zksnark::proof_file::{ProofFile};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Default, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Default, Serialize, Deserialize, Clone)]
 #[near_bindgen]
 struct SetupContract {
     setup_file: SetupFile
@@ -22,26 +22,27 @@ impl SetupContract {
         }
     }
 
-    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
+    pub fn verify(&self, assignments: Vec<FrLocal>, proof: ProofFile) -> bool {
         return self.setup_file.verify(assignments, proof)
     }
 
-    pub fn from_zk(code: &String) -> Self {
-        Self {
-            setup_file: SetupFile::from_zk(code)
-        }        
+    pub fn from_zk(&mut self, code: &String) -> Self {
+        self.setup_file = SetupFile::from_zk(code);
+        self.clone()      
     }
 
-    pub fn from_setup(setup_file: SetupFile) -> Self {
-        Self {
-            setup_file: setup_file
-        }        
+    pub fn from_setup(&mut self, setup_file: SetupFile) -> Self {
+        self.setup_file = setup_file;
+        self.clone()
     }
 
-    pub fn from_hex_string(hex: &String) -> Self {
-        Self {
-            setup_file: SetupFile::from_hex_string(hex.to_string())
-        }        
+    pub fn from_hex_string(&mut self, hex: &String) -> Self {
+        self.setup_file = SetupFile::from_hex_string(hex.to_string());
+        self.clone()
+    }
+
+    pub fn to_hex_string(&self) -> String {
+        self.setup_file.to_hex_string()
     }
 }
 
@@ -81,8 +82,8 @@ mod tests {
         ];
     } 
 
-    fn output_assignments() -> [FrLocal; 2] {
-        return [
+    fn output_assignments() -> Vec<FrLocal> {
+        return vec! [
             FrLocal::from(2),
             FrLocal::from(34)
         ];
@@ -92,7 +93,7 @@ mod tests {
     fn from_zk_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = SetupContract::from_zk(&String::from(TEST_ZK));
+        let contract = SetupContract::default().from_zk(&String::from(TEST_ZK));
         assert_eq!(
             contract.setup_file.check,
             CHECK
@@ -103,7 +104,7 @@ mod tests {
     fn from_hex_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = SetupContract::from_hex_string(&String::from(TEST_HEX));
+        let contract = SetupContract::default().from_hex_string(&String::from(TEST_HEX));
         assert_eq!(
             contract.setup_file.check,
             CHECK
@@ -119,7 +120,7 @@ mod tests {
         
         let proof_file =  ProofFile::from_setup(&input_assignments(), setup_file);
 
-        assert!(setup_contract.verify(&output_assignments(), proof_file))
+        assert!(setup_contract.verify(output_assignments(), proof_file))
     }
 
     use workspaces::prelude::*;

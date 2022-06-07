@@ -1,12 +1,13 @@
 extern crate near_sdk;
 use near_sdk::{metadata, near_bindgen, PanicOnDefault};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{self, Deserialize, Serialize};
 
 use zksnark::proof_file::{ProofFile};
 use zksnark::setup_file::{SetupFile, CHECK, Fileish};
 use zksnark::FrLocal;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Debug, Default, Clone)]
 #[near_bindgen]
 pub struct ProofContract {
     proof_file: ProofFile
@@ -14,10 +15,23 @@ pub struct ProofContract {
 
 #[near_bindgen]
 impl ProofContract {
-    pub fn from_hex_string(hex: &String) -> Self {
+
+    pub fn default () -> Self {
         Self {
-            proof_file: ProofFile::from_hex_string(hex.to_string())
-        }        
+            proof_file: ProofFile::default()
+        }
+    }
+
+    // NOTE: there is no method to create the proof file on chain because doing so would reveal the input data
+    // use the command line tool to create the proof file
+
+    pub fn from_hex_string(&mut self, hex: &String) -> Self {
+        self.proof_file = ProofFile::from_hex_string(hex.to_string());
+        self.clone()
+    }
+
+    pub fn to_hex_string(&self) -> String {
+        self.proof_file.to_hex_string()
     }
 }
 
@@ -25,7 +39,7 @@ impl ProofContract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_sdk::test_utils::{get_logs, VMContextBuilder};
+    use near_sdk::test_utils::{VMContextBuilder};
     use near_sdk::{testing_env, VMContext};
 
     fn input_assignments() -> [FrLocal; 3] {
@@ -33,13 +47,6 @@ mod tests {
             FrLocal::from(3), // a
             FrLocal::from(2), // b
             FrLocal::from(4) // c
-        ];
-    } 
-
-    fn output_assignments() -> [FrLocal; 2] {
-        return [
-            FrLocal::from(2),
-            FrLocal::from(34)
         ];
     } 
 

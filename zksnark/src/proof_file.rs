@@ -17,7 +17,7 @@ use self::serde::{Serialize, Deserialize};
 
 use super::setup_file::{SetupFile, CHECK, Fileish};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ProofFile {
     pub check: u32,
     pub proof: Proof<G1Local, G2Local>
@@ -27,6 +27,13 @@ impl Fileish for ProofFile {
 }
 
 impl ProofFile {
+
+    pub fn default () -> Self {
+        Self {
+            check: 0x0,
+            proof: Proof::default()
+        }
+    }
     
     pub fn from_setup(assignments: &[FrLocal], setup: SetupFile) -> ProofFile {
         let weights = groth16::weights(&setup.code, assignments).unwrap();

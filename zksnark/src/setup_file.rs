@@ -104,16 +104,16 @@ impl SetupFile {
         return SetupFile::from_zk(code);
     }
 
-    pub fn verify(&self, assignments: &[FrLocal], proof: ProofFile) -> bool {
+    pub fn verify(&self, assignments: Vec<FrLocal>, proof: ProofFile) -> bool {
         let sigmas = (self.sigmag1.clone(), self.sigmag2.clone());
         return groth16::verify::<CoefficientPoly<FrLocal>, _, _, _, _> (
             sigmas,
-            assignments,
+            &assignments[..],
             proof.proof
         );
     }
 
-    pub fn verify_from_file(&self, assignments: &[FrLocal], proof_path: std::path::PathBuf) -> bool {
+    pub fn verify_from_file(&self, assignments: Vec<FrLocal>, proof_path: std::path::PathBuf) -> bool {
         let proof: ProofFile = Self::read_bin_file(proof_path);
         return self.verify(assignments, proof)
     }

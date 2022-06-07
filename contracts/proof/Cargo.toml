@@ -14,6 +14,7 @@ getrandom = { git = "https://github.com/peteoleary/getrandom" }
 getrandom = { version="0.2.6", features = ["noop"] }
 zksnark = { path = "../../zksnark" }
 near-sdk = "4"
+serde = "1.0"
 
 [dev-dependencies]
 anyhow = "1.0"

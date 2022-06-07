@@ -1,11 +1,19 @@
 extern crate near_sdk;
-use near_sdk::{metadata, near_bindgen, PanicOnDefault};
+use near_sdk::{near_bindgen, PromiseResult, env, Gas, AccountId, require};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{self, Deserialize, Serialize};
+use near_sdk::serde_json;
 
 use zksnark::proof_file::{ProofFile};
-use zksnark::setup_file::{SetupFile, CHECK, Fileish};
+use zksnark::setup_file::{Fileish};
 use zksnark::FrLocal;
+
+// Prepaid gas for a single (not inclusive of recursion) `factorial` call.
+const FACTORIAL_CALL_GAS: Gas = Gas(20_000_000_000_000);
+
+// Prepaid gas for a single `factorial_mult` call.
+const FACTORIAL_MULT_CALL_GAS: Gas = Gas(10_000_000_000_000);
+
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Debug, Default, Clone)]
 #[near_bindgen]
@@ -25,6 +33,26 @@ impl ProofContract {
     // NOTE: there is no method to create the proof file on chain because doing so would reveal the input data
     // use the command line tool to create the proof file
 
+    pub fn verify(&self, assignments: Vec<FrLocal>, account_id: AccountId) {
+        let prepaid_gas = env::prepaid_gas() - FACTORIAL_CALL_GAS;
+        let promise0 = env::promise_create(
+            account_id.clone(),
+            "verify",
+            &serde_json::to_vec(&(assignments, self.proof_file.clone())).unwrap(),
+            0,
+            prepaid_gas - FACTORIAL_MULT_CALL_GAS,
+        );
+        let self_account_id = env::current_account_id();
+        let promise1 = env::promise_then(
+            promise0,
+            self_account_id,
+            "verify_callback",
+            &[],
+            0,
+            FACTORIAL_MULT_CALL_GAS,
+        );
+        env::promise_return(promise1);
+    }
     pub fn from_hex_string(&mut self, hex: &String) -> Self {
         self.proof_file = ProofFile::from_hex_string(hex.to_string());
         self.clone()
@@ -32,6 +60,16 @@ impl ProofContract {
 
     pub fn to_hex_string(&self) -> String {
         self.proof_file.to_hex_string()
+    }
+
+    pub fn verify_callback(&self, n: u32) {
+        require!(env::current_account_id() == env::predecessor_account_id());
+        require!(env::promise_results_count() == 1);
+        let cur = match env::promise_result(0) {
+            PromiseResult::Successful(x) => serde_json::from_slice::<u32>(&x).unwrap(),
+            _ => env::panic_str("Promise with index 0 failed"),
+        };
+        env::value_return(&serde_json::to_vec(&(cur * n)).unwrap());
     }
 }
 
@@ -41,6 +79,8 @@ mod tests {
     use super::*;
     use near_sdk::test_utils::{VMContextBuilder};
     use near_sdk::{testing_env, VMContext};
+
+    use zksnark::setup_file::{CHECK, SetupFile};
 
     fn input_assignments() -> [FrLocal; 3] {
         return [
@@ -75,7 +115,7 @@ mod tests {
     fn from_hex_test() {
         let context = get_context(false);
         testing_env!(context);
-        let contract = ProofContract::from_hex_string(&String::from(TEST_HEX));
+        let contract = ProofContract::default().from_hex_string(&String::from(TEST_HEX));
         assert_eq!(
             contract.proof_file.check,
             CHECK

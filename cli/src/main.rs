@@ -3,6 +3,8 @@ use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
 
+use std::time::Instant;
+
 extern crate zksnark;
 use zksnark::groth16::fr::FrLocal;
 use zksnark::setup_file::{SetupFile, Fileish};
@@ -60,6 +62,8 @@ enum Commands {
 fn main() {
     let args = Cli::parse();
 
+    let now = Instant::now();
+
     match args.command {
         Commands::SetupFromZK { zk_path, output_path }  => SetupFile::from_zk_file(zk_path.unwrap()).to_file(output_path.unwrap()),
         Commands::SetupToHex { setup_path }  => {
@@ -76,9 +80,11 @@ fn main() {
             ProofFile::from_setup_file(&parse_assignment_string(&assignments.unwrap()[..]), setup_path.unwrap()).to_file(output_path.unwrap());
         },
         Commands::Verify { assignments, setup_path, proof_path }  => {
-            SetupFile::from_file(setup_path.unwrap()).verify_from_file(&parse_assignment_string(&assignments.unwrap()[..]), proof_path.unwrap());
+            SetupFile::from_file(setup_path.unwrap()).verify_from_file(SetupFile::split_assignments_string(assignments.unwrap()), proof_path.unwrap());
         },
         _ => println!("unknown command!"),
     }
-    
+
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}ms", elapsed.as_millis());
 }

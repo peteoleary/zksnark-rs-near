@@ -2,6 +2,7 @@ use std::io::{stdout, Write};
 use std::fs::{File};
 
 use std::string::String;
+use std::str::FromStr;
 
 use groth16;
 use groth16::{SigmaG1, SigmaG2};
@@ -90,6 +91,10 @@ impl SetupFile {
         }
     }
 
+    pub fn split_assignments_string(assignments: String) -> Vec<FrLocal> {
+        return assignments.split(",").map(|x| FrLocal::from_str(x).unwrap()).collect::<Vec<FrLocal>>()
+    }
+
     pub fn from_zk(code: &str) -> SetupFile {
         let qap: QAP<CoefficientPoly<FrLocal>> = ASTParser::try_parse(code).unwrap().into();
     
@@ -132,8 +137,8 @@ mod tests {
         ];
     } 
 
-    fn output_assignments() -> [FrLocal; 2] {
-        return [
+    fn output_assignments() -> Vec<FrLocal> {
+        return vec! [
             FrLocal::from(2),
             FrLocal::from(34)
         ];
@@ -162,7 +167,7 @@ mod tests {
 
     #[test]
     fn try_verify_test() {
-        assert!(SetupFile::from_file(PathBuf::from("../output/simple.setup.bin")).verify_from_file(&output_assignments(), PathBuf::from("../output/simple.proof.bin")));
+        assert!(SetupFile::from_file(PathBuf::from("../output/simple.setup.bin")).verify_from_file(output_assignments(), PathBuf::from("../output/simple.proof.bin")));
     }
 
     #[test]

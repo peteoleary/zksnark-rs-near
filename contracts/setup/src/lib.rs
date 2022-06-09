@@ -4,7 +4,6 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{self, Deserialize, Serialize};
 use near_sdk::serde_json;
 
-use std::str::FromStr;
 use zksnark::groth16::fr::{FrLocal};
 use zksnark::setup_file::{SetupFile, CHECK, Fileish};
 use zksnark::proof_file::{ProofFile};
@@ -28,12 +27,8 @@ impl SetupContract {
         return self.setup_file.verify(assignments, proof)
     }
 
-    fn split_assignments_string(assignments: String) -> Vec<FrLocal> {
-        return assignments.split(",").map(|x| FrLocal::from_str(x).unwrap()).collect::<Vec<FrLocal>>()
-    }
-
     pub fn verify_from_str(&self, assignments_string: String, proof_hex_string: String) -> bool {
-        let assignments: Vec<FrLocal> = Self::split_assignments_string(assignments_string);
+        let assignments: Vec<FrLocal> = SetupFile::split_assignments_string(assignments_string);
         let proof: ProofFile = ProofFile::from_hex_string(proof_hex_string);
         return self.setup_file.verify(assignments, proof)
     }
